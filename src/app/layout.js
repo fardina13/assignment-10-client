@@ -20,8 +20,8 @@ export default function RootLayout({ children }) {
   return (
     <html
       lang="en"
-      data-theme="dark"
-      className={`${alegreya.variable} dark h-full antialiased`}
+      data-theme="light"
+      className={`${alegreya.variable} light h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-[family-name:var(--font-alegreya)]">
         <Navbar/>
