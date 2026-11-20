@@ -1,10 +1,11 @@
-
 "use client";
 
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { signOut, useSession } from "@/lib/auth-client";
+import { Button } from "@heroui/react";
 
 const navLinks = [
   { name: "HOME", href: "/" },
@@ -16,6 +17,13 @@ const navLinks = [
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
+  const {data: session, isPending} = useSession();
+  // console.log("session data in navbar:", session, "isPending:", isPending);
+  const user = session?.user;
+
+  const handleSignOut = async ()=>{
+    await signOut()
+  }
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-[#3D2439]/10 bg-white">
@@ -81,12 +89,24 @@ export default function Navbar() {
           </Link>
 
           {/* Login */}
-          <Link
-            href="/login"
+          {
+            user ?
+            <>
+              Hi, {user.name}
+              <Link
+              onClick={handleSignOut}
+              className="border-l border-[#3D2439]/15 pl-5 text-[12px] font-medium text-[#3D2439] hover:text-[#A61D87]"
+              >
+              LOGOUT
+             </Link>
+            </>
+            :
+            <Link
+            href="/auth/signin"
             className="border-l border-[#3D2439]/15 pl-5 text-[12px] font-medium text-[#3D2439] hover:text-[#A61D87]"
           >
             LOGIN
-          </Link>
+          </Link>}
 
           {/* CTA */}
           <Link
@@ -150,16 +170,29 @@ export default function Navbar() {
             ))}
 
             <div className="mt-3 flex gap-3 border-t border-[#3D2439]/10 pt-4">
-              <Link
-                href="/login"
+            
+              {
+                user ?
+                <>
+                 Hi, {user.name}
+                 <Link
+                onClick={handleSignOut}
+                className="flex-1 border border-[#3D2439] py-3 text-center text-sm font-medium text-[#3D2439]"
+              >
+                Logout
+              </Link>
+                </>
+                :
+                <Link
+                href="/auth/signin"
                 onClick={() => setIsMenuOpen(false)}
                 className="flex-1 border border-[#3D2439] py-3 text-center text-sm font-medium text-[#3D2439]"
               >
                 Login
-              </Link>
+              </Link>}
 
               <Link
-                href="/register"
+                href="/auth/signup"
                 onClick={() => setIsMenuOpen(false)}
                 className="flex-1 bg-[#3D2439] py-3 text-center text-sm font-medium text-white"
               >
