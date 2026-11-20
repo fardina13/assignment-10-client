@@ -93,12 +93,12 @@ export default function Navbar() {
             user ?
             <>
               Hi, {user.name}
-              <Link
-              onClick={handleSignOut}
+              <button 
+               onClick={handleSignOut}
               className="border-l border-[#3D2439]/15 pl-5 text-[12px] font-medium text-[#3D2439] hover:text-[#A61D87]"
               >
-              LOGOUT
-             </Link>
+               LOGOUT
+              </button>
             </>
             :
             <Link
@@ -175,12 +175,14 @@ export default function Navbar() {
                 user ?
                 <>
                  Hi, {user.name}
-                 <Link
+                 
+                <button
                 onClick={handleSignOut}
                 className="flex-1 border border-[#3D2439] py-3 text-center text-sm font-medium text-[#3D2439]"
-              >
-                Logout
-              </Link>
+                >
+                  Logout
+                </button>
+              
                 </>
                 :
                 <Link
