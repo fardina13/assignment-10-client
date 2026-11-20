@@ -90,7 +90,7 @@ export default function Navbar() {
 
           {/* CTA */}
           <Link
-            href="/register"
+            href="/auth/signup"
             className="flex items-center gap-2 bg-[#3D2439] px-6 py-3 text-[11px] font-semibold tracking-wide text-white transition hover:bg-[#A61D87]"
           >
             JOIN NOW
