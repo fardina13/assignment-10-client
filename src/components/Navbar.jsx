@@ -5,7 +5,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { signOut, useSession } from "@/lib/auth-client";
-import { Button } from "@heroui/react";
 
 const navLinks = [
   { name: "HOME", href: "/" },
@@ -17,13 +16,14 @@ const navLinks = [
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
-  const {data: session, isPending} = useSession();
-  // console.log("session data in navbar:", session, "isPending:", isPending);
+
+  const { data: session, isPending } = useSession();
   const user = session?.user;
 
-  const handleSignOut = async ()=>{
-    await signOut()
-  }
+  const handleSignOut = async () => {
+    await signOut();
+    setIsMenuOpen(false);
+  };
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-[#3D2439]/10 bg-white">
@@ -50,12 +50,11 @@ export default function Navbar() {
               <Link
                 key={link.name}
                 href={link.href}
-                className={`relative py-2 text-[12px] font-medium tracking-wide transition-colors duration-200
-                  ${
-                    isActive
-                      ? "text-[#A61D87]"
-                      : "text-[#3D2439] hover:text-[#A61D87]"
-                  }`}
+                className={`relative py-2 text-[12px] font-medium tracking-wide transition-colors duration-200 ${
+                  isActive
+                    ? "text-[#A61D87]"
+                    : "text-[#3D2439] hover:text-[#A61D87]"
+                }`}
               >
                 {link.name}
 
@@ -65,9 +64,27 @@ export default function Navbar() {
               </Link>
             );
           })}
+
+          {/* Dashboard - Only Logged In */}
+          {user && (
+            <Link
+              href="/dashboard/user"
+              className={`relative py-2 text-[12px] font-medium tracking-wide transition-colors ${
+                pathname.startsWith("/dashboard")
+                  ? "text-[#A61D87]"
+                  : "text-[#3D2439] hover:text-[#A61D87]"
+              }`}
+            >
+              DASHBOARD
+
+              {pathname.startsWith("/dashboard") && (
+                <span className="absolute bottom-0 left-0 h-[2px] w-full bg-[#A61D87]" />
+              )}
+            </Link>
+          )}
         </div>
 
-        {/* Right Actions */}
+        {/* Desktop Right Actions */}
         <div className="hidden items-center gap-5 lg:flex">
 
           {/* Search */}
@@ -88,34 +105,57 @@ export default function Navbar() {
             </svg>
           </Link>
 
-          {/* Login */}
-          {
-            user ?
-            <>
-              Hi, {user.name}
-              <button 
-               onClick={handleSignOut}
-              className="border-l border-[#3D2439]/15 pl-5 text-[12px] font-medium text-[#3D2439] hover:text-[#A61D87]"
-              >
-               LOGOUT
-              </button>
-            </>
-            :
-            <Link
-            href="/auth/signin"
-            className="border-l border-[#3D2439]/15 pl-5 text-[12px] font-medium text-[#3D2439] hover:text-[#A61D87]"
-          >
-            LOGIN
-          </Link>}
+          {!isPending && (
+            user ? (
+              <>
+                {/* Profile Photo */}
+                <Link
+                  href="/dashboard/user"
+                  aria-label="User profile"
+                  className="flex items-center"
+                >
+                  {user.image ? (
+                    <img
+                      src={user.image}
+                      alt={user.name || "User"}
+                      className="h-9 w-9 rounded-full border border-[#3D2439]/20 object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#3D2439] text-sm font-semibold text-white">
+                      {user.name?.charAt(0)?.toUpperCase() || "U"}
+                    </div>
+                  )}
+                </Link>
 
-          {/* CTA */}
-          <Link
-            href="/auth/signup"
-            className="flex items-center gap-2 bg-[#3D2439] px-6 py-3 text-[11px] font-semibold tracking-wide text-white transition hover:bg-[#A61D87]"
-          >
-            JOIN NOW
-            <span>→</span>
-          </Link>
+                {/* Logout */}
+                <button
+                  onClick={handleSignOut}
+                  className="border-l border-[#3D2439]/15 pl-5 text-[12px] font-medium text-[#3D2439] hover:text-[#A61D87]"
+                >
+                  LOGOUT
+                </button>
+              </>
+            ) : (
+              <>
+                {/* Login */}
+                <Link
+                  href="/auth/signin"
+                  className="border-l border-[#3D2439]/15 pl-5 text-[12px] font-medium text-[#3D2439] hover:text-[#A61D87]"
+                >
+                  LOGIN
+                </Link>
+
+                {/* Join Now */}
+                <Link
+                  href="/auth/signup"
+                  className="flex items-center gap-2 bg-[#3D2439] px-6 py-3 text-[11px] font-semibold tracking-wide text-white transition hover:bg-[#A61D87]"
+                >
+                  JOIN NOW
+                  <span>→</span>
+                </Link>
+              </>
+            )
+          )}
         </div>
 
         {/* Mobile Menu Button */}
@@ -154,6 +194,7 @@ export default function Navbar() {
       {isMenuOpen && (
         <div className="border-t border-[#3D2439]/10 bg-white px-5 py-5 lg:hidden">
           <div className="flex flex-col gap-1">
+
             {navLinks.map((link) => (
               <Link
                 key={link.name}
@@ -169,37 +210,73 @@ export default function Navbar() {
               </Link>
             ))}
 
-            <div className="mt-3 flex gap-3 border-t border-[#3D2439]/10 pt-4">
-            
-              {
-                user ?
-                <>
-                 Hi, {user.name}
-                 
-                <button
-                onClick={handleSignOut}
-                className="flex-1 border border-[#3D2439] py-3 text-center text-sm font-medium text-[#3D2439]"
-                >
-                  Logout
-                </button>
-              
-                </>
-                :
-                <Link
-                href="/auth/signin"
-                onClick={() => setIsMenuOpen(false)}
-                className="flex-1 border border-[#3D2439] py-3 text-center text-sm font-medium text-[#3D2439]"
-              >
-                Login
-              </Link>}
-
+            {/* Mobile Dashboard */}
+            {user && (
               <Link
-                href="/auth/signup"
+                href="/dashboard/user"
                 onClick={() => setIsMenuOpen(false)}
-                className="flex-1 bg-[#3D2439] py-3 text-center text-sm font-medium text-white"
+                className={`px-3 py-3 text-sm font-medium transition ${
+                  pathname.startsWith("/dashboard")
+                    ? "bg-[#A61D87]/5 text-[#A61D87]"
+                    : "text-[#3D2439] hover:bg-[#A61D87]/5 hover:text-[#A61D87]"
+                }`}
               >
-                Join Now
+                Dashboard
               </Link>
+            )}
+
+            <div className="mt-3 flex items-center gap-3 border-t border-[#3D2439]/10 pt-4">
+
+              {!isPending && (
+                user ? (
+                  <>
+                    {/* Mobile Profile */}
+                    <Link
+                      href="/dashboard/user"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="flex items-center gap-2"
+                    >
+                      {user.image ? (
+                        <img
+                          src={user.image}
+                          alt={user.name || "User"}
+                          className="h-9 w-9 rounded-full border border-[#3D2439]/20 object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#3D2439] text-sm font-semibold text-white">
+                          {user.name?.charAt(0)?.toUpperCase() || "U"}
+                        </div>
+                      )}
+                    </Link>
+
+                    {/* Mobile Logout */}
+                    <button
+                      onClick={handleSignOut}
+                      className="flex-1 border border-[#3D2439] py-3 text-center text-sm font-medium text-[#3D2439] hover:border-[#A61D87] hover:text-[#A61D87]"
+                    >
+                      Logout
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      href="/auth/signin"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="flex-1 border border-[#3D2439] py-3 text-center text-sm font-medium text-[#3D2439]"
+                    >
+                      Login
+                    </Link>
+
+                    <Link
+                      href="/auth/signup"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="flex-1 bg-[#3D2439] py-3 text-center text-sm font-medium text-white"
+                    >
+                      Join Now
+                    </Link>
+                  </>
+                )
+              )}
             </div>
           </div>
         </div>
