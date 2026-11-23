@@ -46,7 +46,7 @@ const MyRecipes = () => {
       }
 
       const data = await res.json();
-      setRecipes(Array.isArray(data) ? data : []);
+      setRecipes(data.recipes || []);
 
     } catch (error) {
       console.error(error);

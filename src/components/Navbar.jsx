@@ -8,7 +8,7 @@ import { signOut, useSession } from "@/lib/auth-client";
 
 const navLinks = [
   { name: "HOME", href: "/" },
-  { name: "BROWSE RECIPES", href: "/recipes" },
+  { name: "BROWSE RECIPES", href: "/browse-recipes" },
   { name: "ABOUT US", href: "/about" },
   { name: "CONTACT", href: "/contact" },
 ];

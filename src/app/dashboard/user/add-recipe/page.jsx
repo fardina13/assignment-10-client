@@ -15,9 +15,12 @@ import {
 import { addRecipe } from "@/lib/actions/recipes";
 import { useRouter } from "next/navigation";
 import { toast } from "@heroui/react";
+import { useSession } from "@/lib/auth-client";
 
 const AddRecipe = () => {
   const router = useRouter();
+  const { data: session } = useSession();
+  const user = session?.user;
 
   const [formData, setFormData] = useState({
     recipeName: "",
@@ -164,12 +167,19 @@ const AddRecipe = () => {
 
       // Prepare Recipe Data
       const recipeData = {
-        ...formData,
-        image: imageUrl,
-        ingredients: formData.ingredients.filter((item) => item.trim()),
-        instructions: formData.instructions.filter((item) => item.trim()),
-        preparationTime: Number(formData.preparationTime),
-      };
+    ...formData,
+    image: imageUrl,
+    ingredients: formData.ingredients.filter((item) => item.trim()),
+    instructions: formData.instructions.filter((item) => item.trim()),
+    preparationTime: Number(formData.preparationTime),
+
+    author: {
+        userId: user?.id,
+        name: user?.name,
+        email: user?.email,
+        image: user?.image,
+    },
+};
 
       // Send Recipe Data to Backend
       const result = await addRecipe(recipeData);
@@ -178,7 +188,7 @@ const AddRecipe = () => {
         toast.success("Recipe added successfully!");
         
         console.log("Backend Response:", result);
-console.log("Inserted ID:", result?.insertedId);
+        console.log("Inserted ID:", result?.insertedId);
 
         // Reset Form
         setFormData({
