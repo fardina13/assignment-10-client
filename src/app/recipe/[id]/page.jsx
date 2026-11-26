@@ -390,15 +390,40 @@ const RecipeDetailsPage = () => {
                                             ? "★ Added to Favorites"
                                             : "☆ Add to Favorites"}
                                 </button>
-
+                                 
                                 {/* Purchase Button */}
-                                <button
-                                    type="button"
-                                    disabled
-                                    className="w-full bg-[#A47798] text-white py-3 rounded-xl text-lg font-semibold opacity-60 cursor-not-allowed"
-                                >
-                                    Purchase Recipe
-                                </button>
+                                
+<button
+  type="button"
+  onClick={async () => {
+    try {
+      const response = await fetch("/api/checkout_sessions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          recipeId: recipe._id,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert(data.error || "Checkout failed");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Something went wrong");
+    }
+  }}
+  className="w-full bg-[#A47798] text-white py-3 rounded-xl text-lg font-semibold hover:bg-[#8D5E7F] transition"
+>
+  Purchase Recipe
+</button>
+
 
                                 {/* Report Button */}
                                 <button

@@ -1,5 +1,7 @@
+
 "use client";
 
+import { useEffect, useState } from "react";
 import { useSession } from "@/lib/auth-client";
 
 import StatsGrid from "@/components/dashboard/stats-grid";
@@ -14,14 +16,7 @@ import {
 const UserDashboard = () => {
   const { data: session, isPending } = useSession();
 
-  if (isPending) {
-    return <div className="text-[#3D2439] p-5">Loading...</div>;
-  }
-
-  const user = session?.user;
-
-  // Dashboard Statistics
-  const userStats = [
+  const [userStats, setUserStats] = useState([
     {
       title: "Total Recipes",
       value: 0,
@@ -40,7 +35,82 @@ const UserDashboard = () => {
       icon: ThumbsUp,
       description: "Across all your recipes",
     },
-  ];
+  ]);
+
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+
+  // Fetch Dashboard Statistics
+  useEffect(() => {
+    if (isPending || !session?.user?.id) return;
+
+    let ignore = false;
+
+    const fetchDashboardStats = async () => {
+      try {
+        const userId = session.user.id;
+
+        const [recipesRes, favoritesRes] = await Promise.all([
+          fetch(`${baseUrl}/users/${userId}/recipes`, {
+            cache: "no-store",
+          }),
+          fetch(`${baseUrl}/users/${userId}/favorites`, {
+            cache: "no-store",
+          }),
+        ]);
+
+        if (!recipesRes.ok || !favoritesRes.ok) {
+          throw new Error("Failed to fetch dashboard statistics.");
+        }
+
+        const recipes = await recipesRes.json();
+        const favorites = await favoritesRes.json();
+
+        const totalLikes = recipes.reduce(
+          (total, recipe) => total + (recipe.likesCount || 0),
+          0
+        );
+
+        if (!ignore) {
+          setUserStats([
+            {
+              title: "Total Recipes",
+              value: recipes.length,
+              icon: ChefHat,
+              href: "/dashboard/user/my-recipes",
+            },
+            {
+              title: "Total Favorites",
+              value: favorites.length,
+              icon: Heart,
+              href: "/dashboard/user/favourites",
+            },
+            {
+              title: "Total Likes Received",
+              value: totalLikes,
+              icon: ThumbsUp,
+              description: "Across all your recipes",
+            },
+          ]);
+        }
+
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchDashboardStats();
+
+    return () => {
+      ignore = true;
+    };
+
+  }, [session?.user?.id, isPending, baseUrl]);
+
+  if (isPending) {
+    return <div className="text-[#3D2439] p-5">Loading...</div>;
+  }
+
+  const user = session?.user;
 
   return (
     <div className="space-y-8">
@@ -72,4 +142,3 @@ const UserDashboard = () => {
 };
 
 export default UserDashboard;
-
